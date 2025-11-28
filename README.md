@@ -9,7 +9,7 @@ A standalone JavaScript library for password-based authentication on the Interne
 
 - 🔐 **Secure Key Derivation**: Uses Argon2id for password hashing
 - 🎯 **Simple API**: Easy-to-use methods for sign up, sign in, and sign out
-- 🌐 **Browser Ready**: Single JavaScript file (184KB) that works in any browser
+- 🌐 **Browser Ready**: Single JavaScript file (259KB) with all dependencies bundled
 - 🔒 **Delegation Support**: Creates delegation identities for secure canister interactions
 - 💾 **Session Management**: Automatic session persistence with localStorage
 - ⏰ **Idle Detection**: Auto-logout after 10 minutes of inactivity (configurable)
@@ -21,14 +21,10 @@ A standalone JavaScript library for password-based authentication on the Interne
 ### Option 1: Download from GitHub Releases (Recommended)
 
 1. Download the latest `ic-password-auth.js` from [GitHub Releases](https://github.com/f0i/sign-in-with-password/releases)
-2. Include it in your HTML along with required dependencies:
+2. Include it in your HTML:
 
 ```html
-<!-- Required dependencies -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
-
-<!-- IC Password Auth Library -->
+<!-- IC Password Auth Library - fully self-contained, no other dependencies needed! -->
 <script src="path/to/ic-password-auth.js"></script>
 ```
 
@@ -57,11 +53,7 @@ npm run build
     <title>IC Password Auth Example</title>
 </head>
 <body>
-    <!-- Required dependencies -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
-
-    <!-- IC Password Auth Library -->
+    <!-- IC Password Auth Library - fully self-contained! -->
     <script src="./dist/ic-password-auth.js"></script>
 
     <script>
@@ -349,8 +341,7 @@ npm run serve
 
 - Modern browser with Web Crypto API support
 - Internet Computer canister with delegation support
-- Argon2-browser library (loaded via CDN)
-- TweetNaCl library (loaded via CDN)
+- **No external dependencies** - Everything is bundled!
 
 ## Releases
 

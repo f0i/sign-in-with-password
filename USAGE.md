@@ -8,14 +8,10 @@ Copy `dist/ic-password-auth.js` to your project's assets folder.
 
 ### Step 2: Include Required Scripts
 
-Add these scripts to your HTML file:
+Add the library to your HTML file:
 
 ```html
-<!-- Required dependencies (from CDN) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
-
-<!-- IC Password Auth Library -->
+<!-- IC Password Auth Library - fully self-contained, no CDN dependencies needed! -->
 <script src="path/to/ic-password-auth.js"></script>
 ```
 
@@ -114,9 +110,7 @@ async function callCanister() {
         <button onclick="signOut()">Sign Out</button>
     </div>
 
-    <!-- Dependencies -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+    <!-- IC Password Auth Library - fully self-contained! -->
     <script src="./ic-password-auth.js"></script>
 
     <script>

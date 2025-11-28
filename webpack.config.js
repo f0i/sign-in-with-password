@@ -9,10 +9,19 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.wasm$/,
+        type: 'asset/inline',
+      },
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', '.ts', '.js', '.wasm'],
+    fallback: {
+      fs: false,
+      path: false,
+      crypto: false,
+    },
   },
   output: {
     filename: 'ic-password-auth.js',
@@ -26,5 +35,8 @@ module.exports = {
   },
   optimization: {
     minimize: true,
+  },
+  experiments: {
+    asyncWebAssembly: true,
   },
 };

@@ -44,11 +44,7 @@ jobs:
             Download `ic-password-auth.js` and include it in your HTML:
 
             ```html
-            <!-- Required dependencies -->
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
-
-            <!-- IC Password Auth Library -->
+            <!-- IC Password Auth Library - fully self-contained, no dependencies needed! -->
             <script src="path/to/ic-password-auth.js"></script>
             ```
 

@@ -9,6 +9,14 @@
 import { Ed25519KeyIdentity, DelegationChain, DelegationIdentity, Delegation } from '@icp-sdk/core/identity';
 import { HttpAgent, Actor } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
+import * as argon2Browser from 'argon2-browser';
+import * as nacl from 'tweetnacl';
+
+// Expose libraries on window object for compatibility
+if (typeof window !== 'undefined') {
+    window.argon2 = argon2Browser;
+    window.nacl = nacl;
+}
 
 // Declare argon2 and nacl globals
 declare global {

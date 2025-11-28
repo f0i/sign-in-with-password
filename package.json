@@ -23,7 +23,9 @@
     "@dfinity/candid": "^3.4.3",
     "@dfinity/identity": "^3.4.3",
     "@dfinity/principal": "^3.4.3",
-    "@icp-sdk/core": "^1.0.0-beta.0"
+    "@icp-sdk/core": "^1.0.0-beta.0",
+    "argon2-browser": "^1.18.0",
+    "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",
