@@ -1,0 +1,35 @@
+{
+  "name": "ic-password-auth",
+  "version": "1.0.0",
+  "description": "Password-based authentication library for the Internet Computer",
+  "main": "dist/ic-password-auth.js",
+  "types": "dist/ic-password-auth.d.ts",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch",
+    "serve": "python3 -m http.server 8080"
+  },
+  "keywords": [
+    "internet-computer",
+    "ic",
+    "authentication",
+    "password",
+    "delegation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@dfinity/agent": "^3.4.3",
+    "@dfinity/candid": "^3.4.3",
+    "@dfinity/identity": "^3.4.3",
+    "@dfinity/principal": "^3.4.3",
+    "@icp-sdk/core": "^1.0.0-beta.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.5",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.6.2",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
