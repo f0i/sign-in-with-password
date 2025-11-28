@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build library
+        run: npm run build
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## IC Password Auth v${{ steps.get_version.outputs.VERSION }}
+
+            ### 📦 Installation
+
+            Download `ic-password-auth.js` and include it in your HTML:
+
+            ```html
+            <!-- Required dependencies -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+
+            <!-- IC Password Auth Library -->
+            <script src="path/to/ic-password-auth.js"></script>
+            ```
+
+            ### 📚 Documentation
+
+            See [README.md](https://github.com/${{ github.repository }}/blob/main/README.md) for complete documentation.
+
+            ### ✨ Features
+
+            - 🔐 Secure password-based authentication for Internet Computer
+            - 💾 Automatic session persistence with localStorage
+            - ⏰ Configurable idle detection and auto-logout
+            - 🔄 Session restoration on page reload
+            - 📦 Built with @icp-sdk/core
+          files: |
+            dist/ic-password-auth.js
+            dist/ic-password-auth.d.ts
+            dist/ic-password-auth.js.LICENSE.txt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-files
+          path: dist/
+          retention-days: 30
