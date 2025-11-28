@@ -23,8 +23,6 @@ A standalone JavaScript library for password-based authentication on the Interne
 1. Download the latest `ic-password-auth.js` from [GitHub Releases](https://github.com/YOUR_USERNAME/ic-password-auth/releases)
 2. Include it in your HTML along with required dependencies:
 
-### Option 2: Build from Source
-
 ```html
 <!-- Required dependencies -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/argon2-browser/1.18.0/argon2-bundled.min.js"></script>
@@ -33,6 +31,8 @@ A standalone JavaScript library for password-based authentication on the Interne
 <!-- IC Password Auth Library -->
 <script src="path/to/ic-password-auth.js"></script>
 ```
+
+### Option 2: Build from Source
 
 ```bash
 # Clone the repository
@@ -352,6 +352,15 @@ npm run serve
 - Argon2-browser library (loaded via CDN)
 - TweetNaCl library (loaded via CDN)
 
+## Releases
+
+This project uses automated releases via GitHub Actions. When a new version tag is pushed:
+- The library is automatically built
+- A GitHub Release is created
+- Built files are uploaded as release assets
+
+See [QUICK_RELEASE.md](QUICK_RELEASE.md) for instructions on creating releases.
+
 ## License
 
 MIT
@@ -359,3 +368,17 @@ MIT
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Build and test (`npm run build`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+### Release Process
+
+See [RELEASING.md](RELEASING.md) for detailed release instructions.
