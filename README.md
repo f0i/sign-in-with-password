@@ -1,7 +1,7 @@
 # IC Password Auth
 
-[![CI](https://github.com/YOUR_USERNAME/ic-password-auth/workflows/CI/badge.svg)](https://github.com/YOUR_USERNAME/ic-password-auth/actions)
-[![Release](https://github.com/YOUR_USERNAME/ic-password-auth/workflows/Release/badge.svg)](https://github.com/YOUR_USERNAME/ic-password-auth/releases)
+[![CI](https://github.com/f0i/sign-in-with-password/workflows/CI/badge.svg)](https://github.com/f0i/sign-in-with-password/actions)
+[![Release](https://github.com/f0i/sign-in-with-password/workflows/Release/badge.svg)](https://github.com/f0i/sign-in-with-password/releases)
 
 A standalone JavaScript library for password-based authentication on the Internet Computer. This library provides a simple API for implementing secure password authentication using delegation identities.
 
@@ -20,7 +20,7 @@ A standalone JavaScript library for password-based authentication on the Interne
 
 ### Option 1: Download from GitHub Releases (Recommended)
 
-1. Download the latest `ic-password-auth.js` from [GitHub Releases](https://github.com/YOUR_USERNAME/ic-password-auth/releases)
+1. Download the latest `ic-password-auth.js` from [GitHub Releases](https://github.com/f0i/sign-in-with-password/releases)
 2. Include it in your HTML along with required dependencies:
 
 ```html
@@ -36,8 +36,8 @@ A standalone JavaScript library for password-based authentication on the Interne
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/ic-password-auth.git
-cd ic-password-auth
+git clone https://github.com/f0i/sign-in-with-password.git
+cd sign-in-with-password
 
 # Install dependencies
 npm install

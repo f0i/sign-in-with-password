@@ -67,12 +67,12 @@ The GitHub Actions workflow will automatically:
 3. Upload `ic-password-auth.js` and related files
 4. Generate release notes
 
-Check the progress at: `https://github.com/YOUR_USERNAME/PASSWORD_REPO/actions`
+Check the progress at: `https://github.com/f0i/sign-in-with-password/actions`
 
 ### 5. Verify Release
 
 Once complete, verify the release at:
-`https://github.com/YOUR_USERNAME/PASSWORD_REPO/releases`
+`https://github.com/f0i/sign-in-with-password/releases`
 
 The release should include:
 - `ic-password-auth.js` - Main library file

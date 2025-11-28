@@ -10,7 +10,7 @@ Once you've pushed this repository to GitHub, follow these steps:
 # Create a new repository on GitHub (don't initialize with README)
 # Then push your local repo:
 
-git remote add origin https://github.com/YOUR_USERNAME/ic-password-auth.git
+git remote add origin https://github.com/f0i/sign-in-with-password.git
 git push -u origin main
 ```
 
@@ -44,7 +44,7 @@ The GitHub Actions workflow will automatically:
 
 Check your release at:
 ```
-https://github.com/YOUR_USERNAME/ic-password-auth/releases
+https://github.com/f0i/sign-in-with-password/releases
 ```
 
 Users can now download `ic-password-auth.js` directly from the release!
@@ -87,7 +87,7 @@ Automatically generated with installation instructions and links to documentatio
 **Workflow not running?**
 - Check that you pushed the tag: `git push origin main --tags`
 - Verify the workflow exists: `.github/workflows/release.yml`
-- Check Actions tab: `https://github.com/YOUR_USERNAME/REPO/actions`
+- Check Actions tab: `https://github.com/f0i/sign-in-with-password/actions`
 
 **Build failed?**
 - Check the Actions logs for errors
