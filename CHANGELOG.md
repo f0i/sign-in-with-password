@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-11-29
+
+### Added
+- npm package publishing with OIDC Trusted Publishers
+- IC-hosted version with integrity hash for CDN usage
+- Feedback form link in documentation
+- MIT License file
+- Comprehensive release documentation (QUICK_RELEASE.md, RELEASING.md)
+- Documentation for deterministic builds
+
+### Changed
+- Installation options now prioritize npm package installation
+- Updated all documentation to use correct git remote name
+- Release workflow now publishes to npm automatically via OIDC
+
+## [0.1.0] - 2025-11-29
+
 ### Added
 - Initial release of IC Password Auth library
 - Password-based authentication using Argon2id key derivation
@@ -17,18 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configurable storage adapters (localStorage, sessionStorage, custom)
 - TypeScript support with full type definitions
 - Built with @icp-sdk/core for modern IC development
-
-### Changed
-- N/A
-
-### Deprecated
-- N/A
-
-### Removed
-- N/A
-
-### Fixed
-- N/A
+- GitHub Actions CI/CD workflow
+- Automated GitHub Releases
 
 ### Security
 - Client-side Argon2id key derivation
@@ -36,6 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic session expiration after 30 minutes
 - Privacy-focused idle detection
 
-## [1.0.0] - TBD
+## [0.0.1] - 2025-11-29
 
-Initial release.
+Initial npm package placeholder for configuring Trusted Publishers.

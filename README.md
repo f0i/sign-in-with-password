@@ -18,7 +18,41 @@ A standalone JavaScript library for password-based authentication on the Interne
 
 ## Installation
 
-### Option 1: Download from GitHub Releases (Recommended)
+### Option 1: npm Package
+
+Install from npm for use in your JavaScript/TypeScript projects:
+
+```bash
+npm install ic-password-auth
+```
+
+Then import in your code:
+
+```javascript
+import { ICPasswordAuth } from 'ic-password-auth';
+
+const auth = new ICPasswordAuth();
+await auth.signIn('username', 'password');
+```
+
+View on npm: [https://www.npmjs.com/package/ic-password-auth](https://www.npmjs.com/package/ic-password-auth)
+
+### Option 2: Use IC-Hosted Version (Recommended for Browser)
+
+Include the library directly from the Internet Computer:
+
+```html
+<!-- IC Password Auth Library - hosted on Internet Computer -->
+<script
+  src="https://fs6xl-xiaaa-aaaah-aqzwa-cai.icp0.io/static/v0.1.1/ic-password-auth.js"
+  integrity="sha256-PQHVAuIGK2Sc6GGCVTYCKZ8/xqcVQhzO0ol5XT/t9mo="
+  crossorigin="anonymous">
+</script>
+```
+
+**Hash (SHA-256):** `3d01d502e2062b649ce8618253622169c7fc6a715421cedd289795d31dfedf6a`
+
+### Option 3: Download from GitHub Releases
 
 1. Download the latest `ic-password-auth.js` from [GitHub Releases](https://github.com/f0i/sign-in-with-password/releases)
 2. Include it in your HTML:
@@ -28,7 +62,7 @@ A standalone JavaScript library for password-based authentication on the Interne
 <script src="path/to/ic-password-auth.js"></script>
 ```
 
-### Option 2: Build from Source
+### Option 4: Build from Source
 
 ```bash
 # Clone the repository
@@ -355,6 +389,10 @@ See [QUICK_RELEASE.md](QUICK_RELEASE.md) for instructions on creating releases.
 ## License
 
 MIT
+
+## Feedback
+
+Have feedback or found a bug? Please share your thoughts using our [feedback form](https://feedback-g5y.caffeine.xyz/?app=password-demo).
 
 ## Contributing
 

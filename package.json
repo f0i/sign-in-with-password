@@ -1,14 +1,31 @@
 {
   "name": "ic-password-auth",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Password-based authentication library for the Internet Computer",
   "main": "dist/ic-password-auth.js",
   "types": "dist/ic-password-auth.d.ts",
+  "files": [
+    "dist/ic-password-auth.js",
+    "dist/ic-password-auth.d.ts",
+    "dist/ic-password-auth.js.LICENSE.txt",
+    "dist/ic-password-auth.d.ts.map",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack --mode development --watch",
-    "serve": "python3 -m http.server 8080"
+    "serve": "python3 -m http.server 8080",
+    "prepublishOnly": "npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/f0i/sign-in-with-password.git"
+  },
+  "bugs": {
+    "url": "https://github.com/f0i/sign-in-with-password/issues"
+  },
+  "homepage": "https://github.com/f0i/sign-in-with-password#readme",
   "keywords": [
     "internet-computer",
     "ic",
@@ -16,7 +33,7 @@
     "password",
     "delegation"
   ],
-  "author": "",
+  "author": "Martin Sigloch",
   "license": "MIT",
   "dependencies": {
     "@dfinity/agent": "^3.4.3",
