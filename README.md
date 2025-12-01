@@ -18,9 +18,24 @@ A standalone JavaScript library for password-based authentication on the Interne
 
 ## Installation
 
-### Option 1: npm Package
+### Option 1: Use IC-Hosted Version (Recommended for Simple Browser Apps)
 
-Install from npm for use in your JavaScript/TypeScript projects:
+Include the library directly from the Internet Computer - no build tools needed:
+
+```html
+<!-- IC Password Auth Library - hosted on Internet Computer -->
+<script
+  src="https://fs6xl-xiaaa-aaaah-aqzwa-cai.icp0.io/static/v0.1.1/ic-password-auth.js"
+  integrity="sha256-PQHVAuIGK2Sc6GGCU2Ihacf8anFUIc7dKJeV0x3+32o="
+  crossorigin="anonymous">
+</script>
+```
+
+**Hash (SHA-256):** `3d01d502e2062b649ce8618253622169c7fc6a715421cedd289795d31dfedf6a`
+
+### Option 2: npm Package (Recommended for Modern Web Apps)
+
+Install from npm for use in your JavaScript/TypeScript projects with bundlers:
 
 ```bash
 npm install ic-password-auth
@@ -36,21 +51,6 @@ await auth.signIn('username', 'password');
 ```
 
 View on npm: [https://www.npmjs.com/package/ic-password-auth](https://www.npmjs.com/package/ic-password-auth)
-
-### Option 2: Use IC-Hosted Version (Recommended for Browser)
-
-Include the library directly from the Internet Computer:
-
-```html
-<!-- IC Password Auth Library - hosted on Internet Computer -->
-<script
-  src="https://fs6xl-xiaaa-aaaah-aqzwa-cai.icp0.io/static/v0.1.1/ic-password-auth.js"
-  integrity="sha256-PQHVAuIGK2Sc6GGCVTYCKZ8/xqcVQhzO0ol5XT/t9mo="
-  crossorigin="anonymous">
-</script>
-```
-
-**Hash (SHA-256):** `3d01d502e2062b649ce8618253622169c7fc6a715421cedd289795d31dfedf6a`
 
 ### Option 3: Download from GitHub Releases
 
@@ -91,56 +91,54 @@ npm run build
     <script src="./dist/ic-password-auth.js"></script>
 
     <script>
-        // Initialize with session management (optional - default instance is auto-created)
-        window.icpassword = new window.ICPasswordAuth({
-            idleManager: {
-                idleTimeout: 10 * 60 * 1000, // 10 minutes
-                onIdle: () => console.log('User became idle')
-            }
-        });
-
         // Check if already authenticated (session restored from localStorage)
         if (window.icpassword.isAuthenticated()) {
-            console.log('Session restored!', window.icpassword.getPrincipal());
+            console.log('✅ Session restored!', window.icpassword.getPrincipal());
+            showDashboard();
+        } else {
+            console.log('❌ Not authenticated');
+            showLoginForm();
         }
 
-        // Sign up a new user
-        async function signUp() {
+        // Authenticate user - handles both new and existing users
+        async function authenticate(username, password) {
             try {
-                const result = await window.icpassword.signUp('myusername', 'mypassword');
-                console.log('Sign up successful!');
-                console.log('Principal:', result.principal);
-                console.log('Expires:', result.expiresAt);
-            } catch (error) {
-                console.error('Sign up failed:', error);
-            }
-        }
+                // Try to sign up first
+                const result = await window.icpassword.signUp(username, password);
 
-        // Sign in an existing user
-        async function signIn() {
-            try {
-                const result = await window.icpassword.signIn('myusername', 'mypassword');
-                console.log('Sign in successful!');
-                console.log('Principal:', result.principal);
-            } catch (error) {
-                console.error('Sign in failed:', error);
-            }
-        }
+                if (result.isNewUser) {
+                    console.log('✅ New account created!');
+                } else {
+                    console.log('✅ Signed in to existing account!');
+                }
 
-        // Get current identity
-        function getCurrentIdentity() {
-            const identity = window.icpassword.getIdentity();
-            if (identity) {
-                console.log('Current principal:', window.icpassword.getPrincipal());
-            } else {
-                console.log('Not authenticated');
+                console.log('Principal:', result.principal);
+                console.log('Session expires:', result.expiresAt);
+
+                showDashboard();
+                return result;
+            } catch (error) {
+                console.error('❌ Authentication failed:', error);
+                throw error;
             }
         }
 
         // Sign out
         function signOut() {
             window.icpassword.signOut();
-            console.log('Signed out');
+            console.log('✅ Signed out');
+            showLoginForm();
+        }
+
+        // Example UI functions
+        function showLoginForm() {
+            // Show your login form UI
+        }
+
+        function showDashboard() {
+            // Show authenticated user dashboard
+            const principal = window.icpassword.getPrincipal();
+            console.log('Logged in as:', principal);
         }
     </script>
 </body>

@@ -658,5 +658,6 @@ export function createICPasswordAuth(config?: ICPasswordAuthConfig): ICPasswordA
 
 // Auto-attach to window if in browser environment
 if (typeof window !== 'undefined') {
+    (window as any).ICPasswordAuth = ICPasswordAuth;
     window.icpassword = new ICPasswordAuth();
 }
