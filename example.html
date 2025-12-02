@@ -1,289 +1,333 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IC Password Auth Example</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IC Password Auth</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #f5f5f5;
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        max-width: 420px;
+        padding: 40px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+      }
+      .subtitle {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 32px;
+      }
+      .subtitle a {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .subtitle a:hover {
+        text-decoration: underline;
+      }
+      label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+      }
+      input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 15px;
+        transition: all 0.2s;
+        margin-bottom: 20px;
+      }
+      input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      .button-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+      }
+      button {
+        flex: 1;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-primary {
+        background: #3b82f6;
+        color: white;
+      }
+      .btn-primary:hover:not(:disabled) {
+        background: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+      }
+      .btn-secondary {
+        background: #10b981;
+        color: white;
+      }
+      .btn-secondary:hover:not(:disabled) {
+        background: #059669;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      }
+      .btn-danger {
+        background: white;
+        color: #ef4444;
+        border: 2px solid #ef4444;
+        width: 100%;
+        margin-top: 24px;
+      }
+      .btn-danger:hover:not(:disabled) {
+        background: #ef4444;
+        color: white;
+      }
+      .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-top: 20px;
+        font-size: 14px;
+        display: none;
+        animation: slideIn 0.3s ease-out;
+      }
+      .alert.show {
+        display: block;
+      }
+      .alert.success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+      }
+      .alert.error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+      }
+      .status {
+        background: #f3f4f6;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 24px;
+      }
+      .status-title {
+        font-weight: 600;
+        color: #10b981;
+        margin-bottom: 12px;
+        font-size: 15px;
+      }
+      .status-row {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 8px;
+      }
+      .status-row:last-child {
+        margin-bottom: 0;
+      }
+      .status-label {
+        font-weight: 600;
+        color: #374151;
+      }
+      code {
+        background: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+        font-size: 12px;
+        color: #3b82f6;
+        border: 1px solid #e5e7eb;
+        word-break: break-all;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
         }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-        button {
-            background: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-right: 10px;
-            margin-top: 10px;
-        }
-        button:hover {
-            background: #45a049;
-        }
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        button.secondary {
-            background: #2196F3;
-        }
-        button.secondary:hover {
-            background: #0b7dda;
-        }
-        button.danger {
-            background: #f44336;
-        }
-        button.danger:hover {
-            background: #da190b;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 4px;
-            display: none;
-        }
-        .result.success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            display: block;
-        }
-        .result.error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            display: block;
-        }
-        .info {
-            background: #e7f3ff;
-            border: 1px solid #b3d9ff;
-            color: #004085;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        .info a {
-            color: #0056b3;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .info a:hover {
-            text-decoration: underline;
-        }
-        .status {
-            margin-top: 20px;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        code {
-            background: #f4f4f4;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
+      }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>IC Password Auth Example</h1>
+  </head>
+  <body>
+    <div class="card">
+      <h1>IC Password Auth</h1>
+      <div class="subtitle">
+        Secure authentication for the Internet Computer ·
+        <a href="https://github.com/f0i/sign-in-with-password" target="_blank"
+          >GitHub</a
+        >
+      </div>
 
-        <div class="info">
-            Secure password-based authentication for the Internet Computer<br>
-            <a href="https://github.com/f0i/sign-in-with-password" target="_blank">View on GitHub</a>
+      <form id="form" onsubmit="handleAuth(event, 'signIn')">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          autocomplete="username"
+          placeholder="Enter your username"
+          required
+        />
+
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          autocomplete="current-password"
+          placeholder="Enter your password"
+          required
+        />
+
+        <div class="button-group">
+          <button
+            type="button"
+            class="btn-secondary"
+            onclick="handleAuth(event, 'signUp')"
+          >
+            Sign Up
+          </button>
+          <button type="submit" class="btn-primary">Sign In</button>
         </div>
+      </form>
 
-        <form id="authForm" onsubmit="event.preventDefault(); handleSignIn();">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" placeholder="Enter username" autocomplete="username" />
-            </div>
+      <button
+        id="signOut"
+        class="btn-danger"
+        onclick="handleSignOut()"
+        style="display: none"
+      >
+        Sign Out
+      </button>
 
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" />
-            </div>
+      <div id="message" class="alert"></div>
 
-            <div>
-                <button type="button" id="signUpBtn" onclick="handleSignUp()">Sign Up</button>
-                <button type="submit" id="signInBtn" class="secondary">Sign In</button>
-            </div>
-        </form>
-
-        <div>
-            <button id="signOutBtn" onclick="handleSignOut()" class="danger" style="display:none;">Sign Out</button>
+      <div id="status" class="status" style="display: none">
+        <div class="status-title">✓ Authenticated</div>
+        <div class="status-row">
+          <span class="status-label">Principal:</span><br />
+          <code id="principal"></code>
         </div>
-
-        <div id="result" class="result"></div>
-
-        <div id="status" class="status" style="display:none;"></div>
+        <div class="status-row">
+          <span class="status-label">Session expires:</span>
+          <span id="expires"></span>
+        </div>
+      </div>
     </div>
 
-    <!-- IC Password Auth Library - fully self-contained! -->
     <script src="./dist/ic-password-auth.js"></script>
-
     <script>
-        // Initialize with session management
-        window.icpassword = new window.ICPasswordAuth({
-            idleManager: {
-                idleTimeout: 10 * 60 * 1000, // 10 minutes
-                onIdle: () => {
-                    showResult('Session expired due to inactivity', 'error');
-                }
-            }
-        });
+      window.icpassword = new window.ICPasswordAuth({
+        idleManager: {
+          idleTimeout: 10 * 60 * 1000,
+          onIdle: () => showMessage("Session expired", "error"),
+        },
+      });
 
-        let resultDiv = document.getElementById('result');
-        let statusDiv = document.getElementById('status');
-        let authForm = document.getElementById('authForm');
-        let signUpBtn = document.getElementById('signUpBtn');
-        let signInBtn = document.getElementById('signInBtn');
-        let signOutBtn = document.getElementById('signOutBtn');
+      const form = document.getElementById("form");
+      const signOut = document.getElementById("signOut");
+      const message = document.getElementById("message");
+      const status = document.getElementById("status");
 
-        // Check if already authenticated on page load
-        window.addEventListener('load', () => {
-            if (window.icpassword.isAuthenticated()) {
-                const principal = window.icpassword.getPrincipal();
-                showStatus(principal, new Date());
-                showResult('Session restored!', 'success');
-            }
-        });
+      window.addEventListener("load", () => {
+        if (window.icpassword.isAuthenticated()) {
+          showAuthenticated(window.icpassword.getPrincipal(), new Date());
+          showMessage("Session restored", "success");
+        }
+      });
 
-        function showResult(message, type) {
-            resultDiv.textContent = message;
-            resultDiv.className = 'result ' + type;
+      function showMessage(text, type) {
+        message.textContent = text;
+        message.className = `alert ${type} show`;
+      }
+
+      function showAuthenticated(principal, expiresAt) {
+        document.getElementById("principal").textContent = principal;
+        document.getElementById("expires").textContent =
+          expiresAt.toLocaleString();
+        status.style.display = "block";
+        form.style.display = "none";
+        signOut.style.display = "block";
+      }
+
+      function showUnauthenticated() {
+        status.style.display = "none";
+        form.style.display = "block";
+        signOut.style.display = "none";
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+      }
+
+      async function handleAuth(event, method) {
+        event.preventDefault();
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        if (!username || !password) {
+          showMessage("Please enter username and password", "error");
+          return;
         }
 
-        function showStatus(principal, expiresAt) {
-            statusDiv.innerHTML = `
-                <strong>✓ Authenticated</strong><br>
-                Principal: <code>${principal}</code><br>
-                Expires: ${expiresAt.toLocaleString()}
-            `;
-            statusDiv.style.display = 'block';
-            authForm.style.display = 'none';
-            signOutBtn.style.display = 'inline-block';
+        const buttons = form.querySelectorAll("button");
+        buttons.forEach((btn) => (btn.disabled = true));
+
+        try {
+          showMessage(
+            method === "signUp" ? "Creating account..." : "Signing in...",
+            "success",
+          );
+          const result = await window.icpassword[method](username, password);
+          showMessage(
+            method === "signUp"
+              ? `${result.isNewUser ? "Account created!" : "Welcome back!"}`
+              : "Signed in successfully!",
+            "success",
+          );
+          showAuthenticated(result.principal, result.expiresAt);
+        } catch (error) {
+          showMessage(error.message, "error");
+          buttons.forEach((btn) => (btn.disabled = false));
         }
+      }
 
-        function hideStatus() {
-            statusDiv.style.display = 'none';
-            authForm.style.display = 'block';
-            signOutBtn.style.display = 'none';
-        }
-
-        async function handleSignUp() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (!username || !password) {
-                showResult('Please enter both username and password', 'error');
-                return;
-            }
-
-            try {
-                signUpBtn.disabled = true;
-                signInBtn.disabled = true;
-                showResult('Creating account...', 'success');
-
-                const result = await window.icpassword.signUp(username, password);
-
-                showResult(
-                    `Account created successfully! ${result.isNewUser ? 'Welcome!' : 'Account already exists.'}`,
-                    'success'
-                );
-                showStatus(result.principal, result.expiresAt);
-            } catch (error) {
-                showResult('Sign up failed: ' + error.message, 'error');
-                signUpBtn.disabled = false;
-                signInBtn.disabled = false;
-            }
-        }
-
-        async function handleSignIn() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (!username || !password) {
-                showResult('Please enter both username and password', 'error');
-                return;
-            }
-
-            try {
-                signUpBtn.disabled = true;
-                signInBtn.disabled = true;
-                showResult('Signing in...', 'success');
-
-                const result = await window.icpassword.signIn(username, password);
-
-                showResult('Sign in successful!', 'success');
-                showStatus(result.principal, result.expiresAt);
-            } catch (error) {
-                showResult('Sign in failed: ' + error.message, 'error');
-                signUpBtn.disabled = false;
-                signInBtn.disabled = false;
-            }
-        }
-
-        function handleSignOut() {
-            window.icpassword.signOut();
-            showResult('Signed out successfully', 'success');
-            hideStatus();
-            signUpBtn.disabled = false;
-            signInBtn.disabled = false;
-            // Clear form fields
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-        }
-
-        // Example: Using the identity for API calls
-        async function callBackend() {
-            const identity = window.icpassword.getIdentity();
-            if (!identity) {
-                console.error('Not authenticated');
-                return;
-            }
-
-            // Create an agent with the delegation identity
-            const agent = await window.icpassword.createAgent();
-
-            // Use the agent to create actors and call backend methods
-            // const actor = Actor.createActor(idlFactory, { agent, canisterId });
-            // const result = await actor.someMethod();
-        }
+      function handleSignOut() {
+        window.icpassword.signOut();
+        showMessage("Signed out successfully", "success");
+        showUnauthenticated();
+      }
     </script>
-</body>
+  </body>
 </html>
