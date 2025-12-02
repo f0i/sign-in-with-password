@@ -95,6 +95,14 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
+        .info a {
+            color: #0056b3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .info a:hover {
+            text-decoration: underline;
+        }
         .status {
             margin-top: 20px;
             padding: 10px;
@@ -115,22 +123,28 @@
         <h1>IC Password Auth Example</h1>
 
         <div class="info">
-            <strong>ℹ️ How to use:</strong> Enter a username and password, then click "Sign Up" to create a new account or "Sign In" to authenticate with an existing account.
+            Secure password-based authentication for the Internet Computer<br>
+            <a href="https://github.com/f0i/sign-in-with-password" target="_blank">View on GitHub</a>
         </div>
 
-        <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" id="username" placeholder="Enter username" />
-        </div>
+        <form id="authForm" onsubmit="event.preventDefault(); handleSignIn();">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" placeholder="Enter username" autocomplete="username" />
+            </div>
 
-        <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" placeholder="Enter password" />
-        </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" />
+            </div>
+
+            <div>
+                <button type="button" id="signUpBtn" onclick="handleSignUp()">Sign Up</button>
+                <button type="submit" id="signInBtn" class="secondary">Sign In</button>
+            </div>
+        </form>
 
         <div>
-            <button id="signUpBtn" onclick="handleSignUp()">Sign Up</button>
-            <button id="signInBtn" onclick="handleSignIn()" class="secondary">Sign In</button>
             <button id="signOutBtn" onclick="handleSignOut()" class="danger" style="display:none;">Sign Out</button>
         </div>
 
@@ -155,6 +169,7 @@
 
         let resultDiv = document.getElementById('result');
         let statusDiv = document.getElementById('status');
+        let authForm = document.getElementById('authForm');
         let signUpBtn = document.getElementById('signUpBtn');
         let signInBtn = document.getElementById('signInBtn');
         let signOutBtn = document.getElementById('signOutBtn');
@@ -180,15 +195,13 @@
                 Expires: ${expiresAt.toLocaleString()}
             `;
             statusDiv.style.display = 'block';
-            signUpBtn.style.display = 'none';
-            signInBtn.style.display = 'none';
+            authForm.style.display = 'none';
             signOutBtn.style.display = 'inline-block';
         }
 
         function hideStatus() {
             statusDiv.style.display = 'none';
-            signUpBtn.style.display = 'inline-block';
-            signInBtn.style.display = 'inline-block';
+            authForm.style.display = 'block';
             signOutBtn.style.display = 'none';
         }
 
@@ -251,6 +264,9 @@
             hideStatus();
             signUpBtn.disabled = false;
             signInBtn.disabled = false;
+            // Clear form fields
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
         }
 
         // Example: Using the identity for API calls
