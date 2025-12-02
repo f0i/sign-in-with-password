@@ -26,11 +26,6 @@ module.exports = {
   output: {
     filename: 'ic-password-auth.js',
     path: path.resolve(__dirname, 'dist'),
-    library: {
-      name: 'ICPasswordAuth',
-      type: 'umd',
-      export: 'default',
-    },
     globalObject: 'this',
   },
   optimization: {

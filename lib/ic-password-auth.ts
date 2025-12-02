@@ -11,6 +11,32 @@ import { HttpAgent, Actor } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import * as argon2Browser from 'argon2-browser';
 import * as nacl from 'tweetnacl';
+// @ts-ignore - WASM import handled by webpack
+import wasmBinary from 'argon2-browser/dist/argon2.wasm';
+
+// Provide custom WASM loader that strips data URL prefix
+if (typeof window !== 'undefined') {
+    (window as any).loadArgon2WasmBinary = () => {
+        return Promise.resolve().then(() => {
+            // Strip data URL prefix if webpack inlined it as data URL
+            let base64 = wasmBinary;
+            if (base64.startsWith('data:')) {
+                const base64Index = base64.indexOf('base64,');
+                if (base64Index !== -1) {
+                    base64 = base64.substring(base64Index + 7);
+                }
+            }
+
+            // Decode base64 to binary
+            const binaryString = atob(base64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        });
+    };
+}
 
 // Expose libraries on window object for compatibility
 if (typeof window !== 'undefined') {
@@ -328,8 +354,8 @@ export class ICPasswordAuth {
     constructor(config: ICPasswordAuthConfig = {}) {
         this.config = {
             delegationCanisterId: config.delegationCanisterId || 'fhzgg-waaaa-aaaah-aqzvq-cai',
-            host: config.host || window.location.origin,
-            fetchRootKey: config.fetchRootKey ?? (process.env.NODE_ENV !== 'production'),
+            host: config.host || 'https://ic0.app',
+            fetchRootKey: config.fetchRootKey ?? false,
             storage: config.storage,
             idleManager: config.idleManager,
         };
