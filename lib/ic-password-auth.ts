@@ -44,6 +44,160 @@ if (typeof window !== 'undefined') {
     window.nacl = nacl;
 }
 
+// Import argon2 library code as raw strings (webpack will inline via asset/source)
+// @ts-ignore
+import argon2LibraryCode from 'argon2-browser/lib/argon2.js';
+// @ts-ignore
+import argon2WasmWrapperCode from 'argon2-browser/dist/argon2.js';
+
+// Worker class to handle argon2 calculations in a separate thread
+class Argon2Worker {
+    private worker: Worker | null = null;
+    private messageId = 0;
+    private pendingMessages = new Map<number, { resolve: (value: any) => void; reject: (error: any) => void }>();
+
+    private createWorker(): Worker {
+        // Create worker code as a string with argon2 library and WASM loader inlined
+        const workerCode = `
+            console.log('[Worker] Starting argon2 worker initialization');
+
+            // WASM binary data
+            const wasmBinary = ${JSON.stringify(wasmBinary)};
+
+            // Custom WASM binary loader
+            self.loadArgon2WasmBinary = () => {
+                console.log('[Worker] loadArgon2WasmBinary called');
+                return Promise.resolve().then(() => {
+                    let base64 = wasmBinary;
+                    if (base64.startsWith('data:')) {
+                        const base64Index = base64.indexOf('base64,');
+                        if (base64Index !== -1) {
+                            base64 = base64.substring(base64Index + 7);
+                        }
+                    }
+
+                    const binaryString = atob(base64);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    console.log('[Worker] WASM binary loaded, size:', bytes.length);
+                    return bytes.buffer;
+                });
+            };
+
+            // Custom WASM module loader - provides the compiled WASM wrapper
+            // This is called by argon2's initWasm() after it sets up Module config
+            self.loadArgon2WasmModule = () => {
+                console.log('[Worker] loadArgon2WasmModule called');
+                return Promise.resolve().then(() => {
+                    // Execute the WASM wrapper code
+                    // The wrapper will use the Module config that was already set up by initWasm
+                    try {
+                        ${argon2WasmWrapperCode}
+                        console.log('[Worker] WASM wrapper code executed');
+                        // Return the Module that the wrapper set up
+                        return self.Module;
+                    } catch (e) {
+                        console.error('[Worker] Error executing WASM wrapper:', e);
+                        throw e;
+                    }
+                });
+            };
+
+            // Load argon2 library (UMD module that attaches to self.argon2)
+            try {
+                ${argon2LibraryCode}
+                console.log('[Worker] Argon2 library loaded, self.argon2 =', typeof self.argon2);
+            } catch (e) {
+                console.error('[Worker] Error loading argon2 library:', e);
+                throw e;
+            }
+
+            // Message handler
+            self.onmessage = async (e) => {
+                console.log('[Worker] Received message:', e.data);
+                try {
+                    const { id, params } = e.data;
+                    console.log('[Worker] Calling argon2.hash with params:', params);
+                    const result = await self.argon2.hash(params);
+                    console.log('[Worker] Hash complete, sending result');
+                    self.postMessage({ id, result });
+                } catch (error) {
+                    console.error('[Worker] Error during hash:', error);
+                    self.postMessage({ id: e.data.id, error: error.message });
+                }
+            };
+
+            console.log('[Worker] Worker initialization complete');
+        `;
+
+        // Create worker from Blob URL
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        const workerUrl = URL.createObjectURL(blob);
+        const worker = new Worker(workerUrl);
+
+        worker.onmessage = (e) => {
+            const { id, result, error } = e.data;
+            const pending = this.pendingMessages.get(id);
+            if (pending) {
+                this.pendingMessages.delete(id);
+                if (error) {
+                    pending.reject(new Error(error));
+                } else {
+                    pending.resolve(result);
+                }
+            }
+        };
+
+        worker.onerror = (error) => {
+            console.error('Worker error:', error);
+            // Reject all pending messages
+            for (const [id, pending] of this.pendingMessages.entries()) {
+                pending.reject(new Error('Worker error: ' + error.message));
+                this.pendingMessages.delete(id);
+            }
+        };
+
+        // Add message error logging
+        worker.addEventListener('messageerror', (e) => {
+            console.error('Worker message error:', e);
+        });
+
+        return worker;
+    }
+
+    public async hash(params: any): Promise<any> {
+        if (!this.worker) {
+            this.worker = this.createWorker();
+        }
+
+        return new Promise((resolve, reject) => {
+            const id = this.messageId++;
+            this.pendingMessages.set(id, { resolve, reject });
+            this.worker!.postMessage({ id, params });
+        });
+    }
+
+    public terminate() {
+        if (this.worker) {
+            this.worker.terminate();
+            this.worker = null;
+        }
+        this.pendingMessages.clear();
+    }
+}
+
+// Global worker instance
+let argon2Worker: Argon2Worker | null = null;
+
+function getArgon2Worker(): Argon2Worker {
+    if (!argon2Worker) {
+        argon2Worker = new Argon2Worker();
+    }
+    return argon2Worker;
+}
+
 // Declare argon2 and nacl globals
 declare global {
     interface Window {
@@ -482,11 +636,6 @@ export class ICPasswordAuth {
      * Internal authentication method
      */
     private async authenticate(username: string, password: string, register: boolean): Promise<AuthResult> {
-        // Check if argon2 is loaded
-        if (!window.argon2) {
-            throw new Error('Argon2 library not loaded. Please include argon2-browser script.');
-        }
-
         // Check if TweetNaCl is loaded
         if (!window.nacl) {
             throw new Error('TweetNaCl library not loaded. Please include tweetnacl script.');
@@ -504,15 +653,16 @@ export class ICPasswordAuth {
         const salt = encoder.encode("icpasswordlogin" + username);
         const passwordBytes = encoder.encode(password);
 
-        // Derive 32-byte seed using Argon2id
-        const result = await window.argon2.hash({
+        // Derive 32-byte seed using Argon2id in a Web Worker (non-blocking)
+        const worker = getArgon2Worker();
+        const result = await worker.hash({
             pass: passwordBytes,
             salt: salt,
             time: 3,
             mem: 65536,
             hashLen: 32,
             parallelism: 1,
-            type: window.argon2.ArgonType.Argon2id,
+            type: 2, // Argon2id
         });
 
         const seed = result.hash;

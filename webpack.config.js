@@ -13,6 +13,11 @@ module.exports = {
         test: /\.wasm$/,
         type: 'asset/inline',
       },
+      {
+        // Load argon2 library files as raw strings for worker
+        test: /argon2-browser\/(lib|dist)\/argon2\.js$/,
+        type: 'asset/source',
+      },
     ],
   },
   resolve: {
