@@ -55,18 +55,28 @@ class Argon2Worker {
     private worker: Worker | null = null;
     private messageId = 0;
     private pendingMessages = new Map<number, { resolve: (value: any) => void; reject: (error: any) => void }>();
+    private debug: boolean;
+
+    constructor(debug: boolean = false) {
+        this.debug = debug;
+    }
 
     private createWorker(): Worker {
+        const debug = this.debug;
         // Create worker code as a string with argon2 library and WASM loader inlined
         const workerCode = `
-            console.log('[Worker] Starting argon2 worker initialization');
+            const DEBUG = ${debug};
+            const log = (...args) => { if (DEBUG) console.log('[Worker]', ...args); };
+            const error = (...args) => { console.error('[Worker]', ...args); };
+
+            log('Starting argon2 worker initialization');
 
             // WASM binary data
             const wasmBinary = ${JSON.stringify(wasmBinary)};
 
             // Custom WASM binary loader
             self.loadArgon2WasmBinary = () => {
-                console.log('[Worker] loadArgon2WasmBinary called');
+                log('loadArgon2WasmBinary called');
                 return Promise.resolve().then(() => {
                     let base64 = wasmBinary;
                     if (base64.startsWith('data:')) {
@@ -81,7 +91,7 @@ class Argon2Worker {
                     for (let i = 0; i < binaryString.length; i++) {
                         bytes[i] = binaryString.charCodeAt(i);
                     }
-                    console.log('[Worker] WASM binary loaded, size:', bytes.length);
+                    log('WASM binary loaded, size:', bytes.length);
                     return bytes.buffer;
                 });
             };
@@ -89,17 +99,17 @@ class Argon2Worker {
             // Custom WASM module loader - provides the compiled WASM wrapper
             // This is called by argon2's initWasm() after it sets up Module config
             self.loadArgon2WasmModule = () => {
-                console.log('[Worker] loadArgon2WasmModule called');
+                log('loadArgon2WasmModule called');
                 return Promise.resolve().then(() => {
                     // Execute the WASM wrapper code
                     // The wrapper will use the Module config that was already set up by initWasm
                     try {
                         ${argon2WasmWrapperCode}
-                        console.log('[Worker] WASM wrapper code executed');
+                        log('WASM wrapper code executed');
                         // Return the Module that the wrapper set up
                         return self.Module;
                     } catch (e) {
-                        console.error('[Worker] Error executing WASM wrapper:', e);
+                        error('Error executing WASM wrapper:', e);
                         throw e;
                     }
                 });
@@ -108,28 +118,28 @@ class Argon2Worker {
             // Load argon2 library (UMD module that attaches to self.argon2)
             try {
                 ${argon2LibraryCode}
-                console.log('[Worker] Argon2 library loaded, self.argon2 =', typeof self.argon2);
+                log('Argon2 library loaded, self.argon2 =', typeof self.argon2);
             } catch (e) {
-                console.error('[Worker] Error loading argon2 library:', e);
+                error('Error loading argon2 library:', e);
                 throw e;
             }
 
             // Message handler
             self.onmessage = async (e) => {
-                console.log('[Worker] Received message:', e.data);
+                log('Received message:', e.data);
                 try {
                     const { id, params } = e.data;
-                    console.log('[Worker] Calling argon2.hash with params:', params);
+                    log('Calling argon2.hash with params:', params);
                     const result = await self.argon2.hash(params);
-                    console.log('[Worker] Hash complete, sending result');
+                    log('Hash complete, sending result');
                     self.postMessage({ id, result });
                 } catch (error) {
-                    console.error('[Worker] Error during hash:', error);
+                    error('Error during hash:', error);
                     self.postMessage({ id: e.data.id, error: error.message });
                 }
             };
 
-            console.log('[Worker] Worker initialization complete');
+            log('Worker initialization complete');
         `;
 
         // Create worker from Blob URL
@@ -275,6 +285,10 @@ export interface ICPasswordAuthConfig {
      * Idle manager configuration for auto-logout
      */
     idleManager?: IdleManagerConfig;
+    /**
+     * Enable debug logging (default: false)
+     */
+    debug?: boolean;
 }
 
 // Authentication result
@@ -512,6 +526,7 @@ export class ICPasswordAuth {
             fetchRootKey: config.fetchRootKey ?? false,
             storage: config.storage,
             idleManager: config.idleManager,
+            debug: config.debug ?? false,
         };
 
         // Initialize storage
