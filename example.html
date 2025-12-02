@@ -292,9 +292,6 @@
         signOut.style.display = "none";
         document.getElementById("username").value = "";
         document.getElementById("password").value = "";
-        // Re-enable buttons
-        const buttons = form.querySelectorAll("button");
-        buttons.forEach((btn) => (btn.disabled = false));
       }
 
       async function handleAuth(event, method) {
@@ -325,6 +322,7 @@
           showAuthenticated(result.principal, result.expiresAt);
         } catch (error) {
           showMessage(error.message, "error");
+        } finally {
           buttons.forEach((btn) => (btn.disabled = false));
         }
       }
