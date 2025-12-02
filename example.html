@@ -292,6 +292,9 @@
         signOut.style.display = "none";
         document.getElementById("username").value = "";
         document.getElementById("password").value = "";
+        // Re-enable buttons
+        const buttons = form.querySelectorAll("button");
+        buttons.forEach((btn) => (btn.disabled = false));
       }
 
       async function handleAuth(event, method) {
