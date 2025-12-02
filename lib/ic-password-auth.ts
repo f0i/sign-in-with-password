@@ -581,7 +581,7 @@ export class ICPasswordAuth {
         );
 
         if ('err' in prepResult) {
-            throw new Error(`Delegation preparation failed: ${prepResult.err}`);
+            throw new Error(prepResult.err);
         }
 
         const { expireAt, isNew } = prepResult.ok;
@@ -596,7 +596,7 @@ export class ICPasswordAuth {
         );
 
         if ('err' in delegationResult) {
-            throw new Error(`Get delegation failed: ${delegationResult.err}`);
+            throw new Error(delegationResult.err);
         }
 
         const authResponse = delegationResult.ok.auth;
