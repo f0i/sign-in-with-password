@@ -255,6 +255,9 @@
           idleTimeout: 10 * 60 * 1000,
           onIdle: () => showMessage("Session expired", "error"),
         },
+        onProgress: (message, step, total) => {
+          showMessage(`${message} (${step}/${total})`, "success");
+        },
       });
 
       const form = document.getElementById("form");

@@ -289,6 +289,10 @@ export interface ICPasswordAuthConfig {
      * Enable debug logging (default: false)
      */
     debug?: boolean;
+    /**
+     * Progress callback for authentication steps
+     */
+    onProgress?: (message: string, currentStep: number, totalSteps: number) => void;
 }
 
 // Authentication result
@@ -527,6 +531,7 @@ export class ICPasswordAuth {
             storage: config.storage,
             idleManager: config.idleManager,
             debug: config.debug ?? false,
+            onProgress: config.onProgress,
         };
 
         // Initialize storage
@@ -668,6 +673,9 @@ export class ICPasswordAuth {
         const salt = encoder.encode("icpasswordlogin" + username);
         const passwordBytes = encoder.encode(password);
 
+        // Report progress: Step 1 - Hashing password
+        this.config.onProgress?.("Hashing password...", 1, 4);
+
         // Derive 32-byte seed using Argon2id in a Web Worker (non-blocking)
         const worker = getArgon2Worker();
         const result = await worker.hash({
@@ -681,6 +689,9 @@ export class ICPasswordAuth {
         });
 
         const seed = result.hash;
+
+        // Report progress: Step 2 - Creating identity
+        this.config.onProgress?.("Creating identity...", 2, 4);
 
         // Generate Ed25519 key pair from the seed
         const keyPair = window.nacl.sign.keyPair.fromSeed(seed);
@@ -734,6 +745,9 @@ export class ICPasswordAuth {
 
         const origin = window.location.origin;
         const expireInNanoseconds = BigInt(30 * 60) * BigInt(1_000_000_000); // 30 minutes
+
+        // Report progress: Step 3 - Requesting delegation
+        this.config.onProgress?.("Requesting delegation...", 3, 4);
 
         // Prepare delegation
         const prepResult = await delegationActor.prepareDelegationPassword(
@@ -810,6 +824,9 @@ export class ICPasswordAuth {
         if (this.idleManager) {
             this.idleManager.start();
         }
+
+        // Report progress: Step 4 - Complete
+        this.config.onProgress?.("Authentication complete", 4, 4);
 
         return {
             delegationIdentity,
