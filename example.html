@@ -268,7 +268,10 @@
 
       window.addEventListener("load", () => {
         if (window.icpassword.isAuthenticated()) {
-          showAuthenticated(window.icpassword.getPrincipal(), new Date());
+          showAuthenticated(
+            window.icpassword.getPrincipal(),
+            window.icpassword.getExpiresAt()
+          );
           showMessage("Session restored", "success");
         }
       });

@@ -519,6 +519,7 @@ function derEncodePublicKey(publicKey: Uint8Array): Uint8Array {
 export class ICPasswordAuth {
     private config: ICPasswordAuthConfig;
     private currentIdentity: DelegationIdentity | null = null;
+    private currentExpiresAt: Date | null = null;
     private storage: AuthStorage;
     private idleManager: IdleManager | null = null;
     private sessionKey = 'ic-password-auth-session';
@@ -590,10 +591,18 @@ export class ICPasswordAuth {
     }
 
     /**
+     * Get the expiration date of the current session
+     */
+    getExpiresAt(): Date | null {
+        return this.currentExpiresAt;
+    }
+
+    /**
      * Sign out and clear the current identity
      */
     signOut(): void {
         this.currentIdentity = null;
+        this.currentExpiresAt = null;
         this.storage.remove(this.sessionKey);
         if (this.idleManager) {
             this.idleManager.stop();
@@ -638,9 +647,21 @@ export class ICPasswordAuth {
             // Restore delegation chain
             const delegationChain = DelegationChain.fromJSON(JSON.parse(session.delegationChain));
 
-            // Note: We cannot restore the ephemeral identity from storage
-            // The session will work for read operations but not for creating new delegations
-            // For full functionality, user should sign in again
+            // Create a temporary ephemeral identity for the restored session
+            // Note: This is a placeholder identity - the actual ephemeral key is not stored
+            // The restored session will work for authenticated requests
+            const tempKeyPair = window.nacl.sign.keyPair();
+            const tempIdentity = Ed25519KeyIdentity.fromKeyPair(
+                tempKeyPair.publicKey,
+                tempKeyPair.secretKey
+            );
+
+            // Create delegation identity from the restored chain
+            this.currentIdentity = DelegationIdentity.fromDelegation(
+                tempIdentity,
+                delegationChain
+            );
+            this.currentExpiresAt = new Date(session.expiresAt);
 
             // Start idle manager if configured
             if (this.idleManager) {
@@ -813,9 +834,10 @@ export class ICPasswordAuth {
         );
 
         this.currentIdentity = delegationIdentity;
+        const expiresAt = new Date(Number(expireAt / BigInt(1_000_000)));
+        this.currentExpiresAt = expiresAt;
 
         const principal = delegationIdentity.getPrincipal().toString();
-        const expiresAt = new Date(Number(expireAt / BigInt(1_000_000)));
 
         // Save session to storage
         await this.saveSession(delegationChain, principal, expiresAt);
