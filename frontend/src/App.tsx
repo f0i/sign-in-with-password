@@ -508,6 +508,7 @@ function App() {
         setMessage('');
         setMessageResponse('');
         setDelegationIdentity(null);
+        setIsLoading(false);
     };
 
     return (

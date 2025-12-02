@@ -674,7 +674,7 @@ export class ICPasswordAuth {
         const passwordBytes = encoder.encode(password);
 
         // Report progress: Step 1 - Hashing password
-        this.config.onProgress?.("Hashing password...", 1, 4);
+        this.config.onProgress?.("Hashing password...", 1, 3);
 
         // Derive 32-byte seed using Argon2id in a Web Worker (non-blocking)
         const worker = getArgon2Worker();
@@ -690,8 +690,8 @@ export class ICPasswordAuth {
 
         const seed = result.hash;
 
-        // Report progress: Step 2 - Creating identity
-        this.config.onProgress?.("Creating identity...", 2, 4);
+        // Report progress: Step 2 - Preparing login session
+        this.config.onProgress?.("Preparing login session...", 2, 3);
 
         // Generate Ed25519 key pair from the seed
         const keyPair = window.nacl.sign.keyPair.fromSeed(seed);
@@ -746,10 +746,7 @@ export class ICPasswordAuth {
         const origin = window.location.origin;
         const expireInNanoseconds = BigInt(30 * 60) * BigInt(1_000_000_000); // 30 minutes
 
-        // Report progress: Step 3 - Requesting delegation
-        this.config.onProgress?.("Requesting delegation...", 3, 4);
-
-        // Prepare delegation
+        // Prepare delegation (still part of creating identity step)
         const prepResult = await delegationActor.prepareDelegationPassword(
             usernameHash,
             register,
@@ -764,6 +761,9 @@ export class ICPasswordAuth {
         }
 
         const { expireAt, isNew } = prepResult.ok;
+
+        // Report progress: Step 3 - Requesting delegation
+        this.config.onProgress?.("Requesting delegation...", 3, 3);
 
         // Get delegation
         const delegationResult = await delegationActor.getDelegation(
@@ -824,9 +824,6 @@ export class ICPasswordAuth {
         if (this.idleManager) {
             this.idleManager.start();
         }
-
-        // Report progress: Step 4 - Complete
-        this.config.onProgress?.("Authentication complete", 4, 4);
 
         return {
             delegationIdentity,
