@@ -548,6 +548,7 @@ export class ICPasswordAuth {
     private storage: AuthStorage;
     private idleManager: IdleManager | null = null;
     private sessionKey = 'ic-password-auth-session';
+    private expirationTimer: ReturnType<typeof setTimeout> | null = null;
 
     constructor(config: ICPasswordAuthConfig = {}) {
         this.config = {
@@ -587,6 +588,40 @@ export class ICPasswordAuth {
      */
     private handleIdle(): void {
         this.signOut('idle');
+    }
+
+    /**
+     * Set timer to check session expiration
+     */
+    private setExpirationTimer(expiresAt: Date): void {
+        // Clear any existing timer
+        if (this.expirationTimer) {
+            clearTimeout(this.expirationTimer);
+            this.expirationTimer = null;
+        }
+
+        const msUntilExpiration = expiresAt.getTime() - Date.now();
+
+        if (msUntilExpiration <= 0) {
+            // Already expired
+            this.signOut('expired');
+            return;
+        }
+
+        // Clamp timeout between 5 seconds and 12 hours
+        const MIN_TIMEOUT = 5 * 1000;           // 5 seconds
+        const MAX_TIMEOUT = 12 * 60 * 60 * 1000; // 12 hours
+        const timeout = Math.max(MIN_TIMEOUT, Math.min(msUntilExpiration, MAX_TIMEOUT));
+
+        this.expirationTimer = setTimeout(() => {
+            // Check if session is actually expired
+            if (this.currentExpiresAt && Date.now() >= this.currentExpiresAt.getTime()) {
+                this.signOut('expired');
+            } else if (this.currentExpiresAt) {
+                // Still valid, reschedule (handles early firing, clock changes, renewals)
+                this.setExpirationTimer(this.currentExpiresAt);
+            }
+        }, timeout);
     }
 
     /**
@@ -661,6 +696,10 @@ export class ICPasswordAuth {
         if (this.idleManager) {
             this.idleManager.stop();
         }
+        if (this.expirationTimer) {
+            clearTimeout(this.expirationTimer);
+            this.expirationTimer = null;
+        }
         this.config.onAuth?.({
             authenticated: false,
             event: 'signOut',
@@ -731,6 +770,9 @@ export class ICPasswordAuth {
             if (this.idleManager) {
                 this.idleManager.start();
             }
+
+            // Set expiration timer
+            this.setExpirationTimer(this.currentExpiresAt);
 
             // Notify that session was restored
             this.config.onAuth?.({
@@ -919,6 +961,9 @@ export class ICPasswordAuth {
         if (this.idleManager) {
             this.idleManager.start();
         }
+
+        // Set expiration timer
+        this.setExpirationTimer(expiresAt);
 
         return {
             delegationIdentity,
