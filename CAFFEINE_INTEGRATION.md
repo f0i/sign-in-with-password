@@ -250,8 +250,14 @@ new ICPasswordAuth({
     onIdle: () => { /* custom handler */ },
     captureScroll: false                     // Track scroll as activity
   },
-  onProgress: (msg, step, total) => {        // Optional progress callback
-    console.log(`${msg} (${step}/${total})`);
+  onProgress: ({ message, step, total }) => { // Progress callback (optional)
+    console.log(`${message} (${step}/${total})`);
+  },
+  onAuth: ({ authenticated, event, reason, principal }) => { // Auth events (optional)
+    console.log(`${event} (${reason})`, { authenticated, principal });
+  },
+  onError: (error) => {                      // Error callback (optional)
+    console.error('Auth error:', error);
   },
   debug: false                               // Enable debug logging
 })

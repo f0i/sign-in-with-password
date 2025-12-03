@@ -325,9 +325,21 @@ const auth = new ICPasswordAuth({
     },
 
     // Progress callback for authentication steps
-    onProgress: (message, currentStep, totalSteps) => {
-        console.log(`${message} (${currentStep}/${totalSteps})`);
+    onProgress: ({ message, step, total }) => {
+        console.log(`${message} (${step}/${total})`);
         // Update your UI with progress
+    },
+
+    // Authentication state change callback
+    onAuth: ({ authenticated, event, reason, principal, expiresAt, isNewUser }) => {
+        console.log(`Auth: ${event} (${reason})`, { authenticated, principal });
+        // Track auth state changes, analytics, etc.
+    },
+
+    // Error callback for authentication failures
+    onError: (error) => {
+        console.error('Auth error:', error);
+        // Handle errors, show notifications, etc.
     },
 
     // Enable debug logging (default: false)
@@ -358,16 +370,19 @@ const auth = new ICPasswordAuth({
 });
 ```
 
-### Progress Tracking
+### Event Callbacks
+
+The library provides optional callbacks for tracking authentication events, progress, and errors:
+
+#### Progress Tracking
 
 The `onProgress` callback provides real-time feedback during authentication:
 
 ```javascript
 const auth = new ICPasswordAuth({
-    onProgress: (message, currentStep, totalSteps) => {
+    onProgress: ({ message, step, total }) => {
         // Update your UI - progress bar, status text, etc.
-        document.getElementById('status').textContent =
-            `${message} (${currentStep}/${totalSteps})`;
+        document.getElementById('status').textContent = `${message} (${step}/${total})`;
     }
 });
 ```
@@ -377,7 +392,42 @@ const auth = new ICPasswordAuth({
 2. **"Preparing login session..." (2/3)** - Identity creation and delegation preparation
 3. **"Requesting delegation..." (3/3)** - Final delegation request
 
-This is completely optional - if you don't provide a callback, authentication works exactly as before.
+#### Authentication Events
+
+The `onAuth` callback fires on all authentication state changes:
+
+```javascript
+const auth = new ICPasswordAuth({
+    onAuth: ({ authenticated, event, reason, principal, expiresAt, isNewUser }) => {
+        console.log(`${event} (${reason})`, { authenticated, principal });
+
+        // Examples:
+        // - event: 'signIn', reason: 'manual' - User signed in
+        // - event: 'signIn', reason: 'restore' - Session restored from storage
+        // - event: 'signUp', reason: 'manual' - New user signed up
+        // - event: 'signOut', reason: 'manual' - User signed out
+        // - event: 'signOut', reason: 'idle' - Idle timeout
+        // - event: 'signOut', reason: 'expired' - Session expired
+
+        // Use for analytics, global UI state, logging, etc.
+    }
+});
+```
+
+#### Error Handling
+
+The `onError` callback fires when authentication fails:
+
+```javascript
+const auth = new ICPasswordAuth({
+    onError: (error) => {
+        console.error('Authentication error:', error.message);
+        // Show notification, track errors, etc.
+    }
+});
+```
+
+**Note:** All callbacks are optional and fire after promises resolve/reject. The promise-based API remains unchanged - use callbacks for side effects like analytics, logging, or global state management.
 
 ## How It Works
 
