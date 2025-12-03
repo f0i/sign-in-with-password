@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IC Password Auth - Simple Example</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 20px;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 8px 8px 8px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .primary {
+        background: #4caf50;
+        color: white;
+      }
+      .secondary {
+        background: #2196f3;
+        color: white;
+      }
+      .message {
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 4px;
+        display: none;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>IC Password Auth</h1>
+
+    <div id="loginForm">
+      <input
+        type="text"
+        id="username"
+        placeholder="Username"
+        autocomplete="username"
+      />
+      <input
+        type="password"
+        id="password"
+        placeholder="Password"
+        autocomplete="current-password"
+      />
+      <button class="primary" onclick="signUp()">Sign Up</button>
+      <button class="secondary" onclick="signIn()">Sign In</button>
+    </div>
+
+    <div id="dashboard" style="display: none">
+      <p>Logged in as: <strong id="principal"></strong></p>
+      <button onclick="signOut()">Sign Out</button>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <script src="./dist/ic-password-auth.js"></script>
+    <script>
+      const icpassword = new window.ICPasswordAuth();
+
+      // Check if already authenticated on page load
+      if (icpassword.isAuthenticated()) {
+        showDashboard();
+      }
+
+      async function signUp() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        const buttons = document.querySelectorAll("button");
+        buttons.forEach((btn) => (btn.disabled = true));
+        showMessage("Creating account...", "success");
+
+        try {
+          const result = await icpassword.signUp(username, password);
+          showMessage(
+            result.isNewUser ? "Account created!" : "Already exists, signed in!",
+            "success"
+          );
+          showDashboard();
+        } catch (error) {
+          showMessage("Sign up failed: " + error.message, "error");
+          buttons.forEach((btn) => (btn.disabled = false));
+        }
+      }
+
+      async function signIn() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        const buttons = document.querySelectorAll("button");
+        buttons.forEach((btn) => (btn.disabled = true));
+        showMessage("Signing in...", "success");
+
+        try {
+          await icpassword.signIn(username, password);
+          showMessage("Signed in!", "success");
+          showDashboard();
+        } catch (error) {
+          showMessage("Sign in failed: " + error.message, "error");
+          buttons.forEach((btn) => (btn.disabled = false));
+        }
+      }
+
+      function signOut() {
+        icpassword.signOut();
+        showMessage("Signed out", "success");
+        document.getElementById("loginForm").style.display = "block";
+        document.getElementById("dashboard").style.display = "none";
+      }
+
+      function showDashboard() {
+        document.getElementById("principal").textContent =
+          icpassword.getPrincipal();
+        document.getElementById("loginForm").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+      }
+
+      function showMessage(text, type) {
+        const msg = document.getElementById("message");
+        msg.textContent = text;
+        msg.className = "message " + type;
+        msg.style.display = "block";
+      }
+    </script>
+  </body>
+</html>
