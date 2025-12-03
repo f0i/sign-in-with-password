@@ -251,38 +251,42 @@
 
     <script src="./dist/ic-password-auth.js"></script>
     <script>
-      const icpassword = new window.ICPasswordAuth({
-        idleManager: {
-          idleTimeout: 10 * 60 * 1000,
-          onIdle: () => showMessage("Session expired", "error"),
-        },
-        onProgress: ({ message, step, total }) => {
-          showMessage(`${message} (${step}/${total})`, "success");
-        },
-        onAuth: ({ authenticated, event, reason, principal }) => {
-          console.log(`Auth event: ${event} (${reason})`, {
-            authenticated,
-            principal,
-          });
-        },
-        onError: (error) => {
-          console.error("Auth error:", error);
-        },
-      });
-
       const form = document.getElementById("form");
       const signOut = document.getElementById("signOut");
       const message = document.getElementById("message");
       const status = document.getElementById("status");
 
-      window.addEventListener("load", () => {
-        if (icpassword.isAuthenticated()) {
-          showAuthenticated(
-            icpassword.getPrincipal(),
-            icpassword.getExpiresAt()
-          );
-          showMessage("Session restored", "success");
-        }
+      const icpassword = new window.ICPasswordAuth({
+        idleManager: {
+          idleTimeout: 10 * 60 * 1000,
+        },
+        onProgress: ({ message, step, total }) => {
+          showMessage(`${message} (${step}/${total})`, "success");
+        },
+        onAuth: ({ authenticated, event, reason, principal, expiresAt }) => {
+          if (authenticated) {
+            showAuthenticated(principal, expiresAt);
+            if (reason === "restore") {
+              showMessage("Session restored", "success");
+            } else {
+              showMessage(
+                event === "signUp" ? "Account created!" : "Signed in!",
+                "success"
+              );
+            }
+          } else {
+            showUnauthenticated();
+            showMessage(
+              reason === "idle"
+                ? "Session expired due to inactivity"
+                : "Signed out",
+              reason === "idle" ? "error" : "success"
+            );
+          }
+        },
+        onError: (error) => {
+          showMessage(error.message, "error");
+        },
       });
 
       function showMessage(text, type) {
@@ -321,20 +325,10 @@
         buttons.forEach((btn) => (btn.disabled = true));
 
         try {
-          showMessage(
-            method === "signUp" ? "Creating account..." : "Signing in...",
-            "success",
-          );
-          const result = await icpassword[method](username, password);
-          showMessage(
-            method === "signUp"
-              ? `${result.isNewUser ? "Account created!" : "Welcome back!"}`
-              : "Signed in successfully!",
-            "success",
-          );
-          showAuthenticated(result.principal, result.expiresAt);
+          await icpassword[method](username, password);
+          // UI updates handled by onAuth callback
         } catch (error) {
-          showMessage(error.message, "error");
+          // Error display handled by onError callback
         } finally {
           buttons.forEach((btn) => (btn.disabled = false));
         }
@@ -342,8 +336,7 @@
 
       function handleSignOut() {
         icpassword.signOut();
-        showMessage("Signed out successfully", "success");
-        showUnauthenticated();
+        // UI updates handled by onAuth callback
       }
     </script>
   </body>
