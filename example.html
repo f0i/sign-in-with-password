@@ -251,7 +251,7 @@
 
     <script src="./dist/ic-password-auth.js"></script>
     <script>
-      window.icpassword = new window.ICPasswordAuth({
+      const icpassword = new window.ICPasswordAuth({
         idleManager: {
           idleTimeout: 10 * 60 * 1000,
           onIdle: () => showMessage("Session expired", "error"),
@@ -267,10 +267,10 @@
       const status = document.getElementById("status");
 
       window.addEventListener("load", () => {
-        if (window.icpassword.isAuthenticated()) {
+        if (icpassword.isAuthenticated()) {
           showAuthenticated(
-            window.icpassword.getPrincipal(),
-            window.icpassword.getExpiresAt()
+            icpassword.getPrincipal(),
+            icpassword.getExpiresAt()
           );
           showMessage("Session restored", "success");
         }
@@ -316,7 +316,7 @@
             method === "signUp" ? "Creating account..." : "Signing in...",
             "success",
           );
-          const result = await window.icpassword[method](username, password);
+          const result = await icpassword[method](username, password);
           showMessage(
             method === "signUp"
               ? `${result.isNewUser ? "Account created!" : "Welcome back!"}`
@@ -332,7 +332,7 @@
       }
 
       function handleSignOut() {
-        window.icpassword.signOut();
+        icpassword.signOut();
         showMessage("Signed out successfully", "success");
         showUnauthenticated();
       }
