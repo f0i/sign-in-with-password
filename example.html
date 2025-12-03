@@ -256,8 +256,17 @@
           idleTimeout: 10 * 60 * 1000,
           onIdle: () => showMessage("Session expired", "error"),
         },
-        onProgress: (message, step, total) => {
+        onProgress: ({ message, step, total }) => {
           showMessage(`${message} (${step}/${total})`, "success");
+        },
+        onAuth: ({ authenticated, event, reason, principal }) => {
+          console.log(`Auth event: ${event} (${reason})`, {
+            authenticated,
+            principal,
+          });
+        },
+        onError: (error) => {
+          console.error("Auth error:", error);
         },
       });
 

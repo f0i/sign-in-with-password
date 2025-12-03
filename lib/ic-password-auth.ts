@@ -272,6 +272,23 @@ export interface IdleManagerConfig {
     captureScroll?: boolean;
 }
 
+// Authentication event data
+export interface AuthEventData {
+    authenticated: boolean;
+    event: 'signIn' | 'signOut' | 'signUp';
+    reason: 'manual' | 'restore' | 'idle' | 'expired';
+    principal?: string;
+    expiresAt?: Date;
+    isNewUser?: boolean;
+}
+
+// Progress event data
+export interface ProgressEventData {
+    message: string;
+    step: number;
+    total: number;
+}
+
 // Configuration interface
 export interface ICPasswordAuthConfig {
     delegationCanisterId?: string;
@@ -292,7 +309,15 @@ export interface ICPasswordAuthConfig {
     /**
      * Progress callback for authentication steps
      */
-    onProgress?: (message: string, currentStep: number, totalSteps: number) => void;
+    onProgress?: (data: ProgressEventData) => void;
+    /**
+     * Authentication state change callback
+     */
+    onAuth?: (data: AuthEventData) => void;
+    /**
+     * Error callback for authentication failures
+     */
+    onError?: (error: Error) => void;
 }
 
 // Authentication result
@@ -533,6 +558,8 @@ export class ICPasswordAuth {
             idleManager: config.idleManager,
             debug: config.debug ?? false,
             onProgress: config.onProgress,
+            onAuth: config.onAuth,
+            onError: config.onError,
         };
 
         // Initialize storage
@@ -559,21 +586,48 @@ export class ICPasswordAuth {
      * Handle idle timeout
      */
     private handleIdle(): void {
-        this.signOut();
+        this.signOut('idle');
     }
 
     /**
      * Sign up a new user with username and password
      */
     async signUp(username: string, password: string): Promise<AuthResult> {
-        return this.authenticate(username, password, true);
+        try {
+            const result = await this.authenticate(username, password, true);
+            this.config.onAuth?.({
+                authenticated: true,
+                event: 'signUp',
+                reason: 'manual',
+                principal: result.principal,
+                expiresAt: result.expiresAt,
+                isNewUser: result.isNewUser,
+            });
+            return result;
+        } catch (error) {
+            this.config.onError?.(error as Error);
+            throw error;
+        }
     }
 
     /**
      * Sign in an existing user with username and password
      */
     async signIn(username: string, password: string): Promise<AuthResult> {
-        return this.authenticate(username, password, false);
+        try {
+            const result = await this.authenticate(username, password, false);
+            this.config.onAuth?.({
+                authenticated: true,
+                event: 'signIn',
+                reason: 'manual',
+                principal: result.principal,
+                expiresAt: result.expiresAt,
+            });
+            return result;
+        } catch (error) {
+            this.config.onError?.(error as Error);
+            throw error;
+        }
     }
 
     /**
@@ -600,13 +654,18 @@ export class ICPasswordAuth {
     /**
      * Sign out and clear the current identity
      */
-    signOut(): void {
+    signOut(reason: 'manual' | 'idle' | 'expired' = 'manual'): void {
         this.currentIdentity = null;
         this.currentExpiresAt = null;
         this.storage.remove(this.sessionKey);
         if (this.idleManager) {
             this.idleManager.stop();
         }
+        this.config.onAuth?.({
+            authenticated: false,
+            event: 'signOut',
+            reason: reason,
+        });
     }
 
     /**
@@ -641,6 +700,11 @@ export class ICPasswordAuth {
             // Check if session expired
             if (Date.now() >= session.expiresAt) {
                 await this.storage.remove(this.sessionKey);
+                this.config.onAuth?.({
+                    authenticated: false,
+                    event: 'signOut',
+                    reason: 'expired',
+                });
                 return;
             }
 
@@ -667,6 +731,15 @@ export class ICPasswordAuth {
             if (this.idleManager) {
                 this.idleManager.start();
             }
+
+            // Notify that session was restored
+            this.config.onAuth?.({
+                authenticated: true,
+                event: 'signIn',
+                reason: 'restore',
+                principal: session.principal,
+                expiresAt: this.currentExpiresAt,
+            });
         } catch (error) {
             console.error('Failed to restore session:', error);
             await this.storage.remove(this.sessionKey);
@@ -695,7 +768,7 @@ export class ICPasswordAuth {
         const passwordBytes = encoder.encode(password);
 
         // Report progress: Step 1 - Hashing password
-        this.config.onProgress?.("Hashing password...", 1, 3);
+        this.config.onProgress?.({ message: "Hashing password...", step: 1, total: 3 });
 
         // Derive 32-byte seed using Argon2id in a Web Worker (non-blocking)
         const worker = getArgon2Worker();
@@ -712,7 +785,7 @@ export class ICPasswordAuth {
         const seed = result.hash;
 
         // Report progress: Step 2 - Preparing login session
-        this.config.onProgress?.("Preparing login session...", 2, 3);
+        this.config.onProgress?.({ message: "Preparing login session...", step: 2, total: 3 });
 
         // Generate Ed25519 key pair from the seed
         const keyPair = window.nacl.sign.keyPair.fromSeed(seed);
@@ -784,7 +857,7 @@ export class ICPasswordAuth {
         const { expireAt, isNew } = prepResult.ok;
 
         // Report progress: Step 3 - Requesting delegation
-        this.config.onProgress?.("Requesting delegation...", 3, 3);
+        this.config.onProgress?.({ message: "Requesting delegation...", step: 3, total: 3 });
 
         // Get delegation
         const delegationResult = await delegationActor.getDelegation(
