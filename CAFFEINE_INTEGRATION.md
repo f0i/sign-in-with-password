@@ -234,6 +234,7 @@ function handleSignOut() {
 - `signOut()` - Clear session and log out
 - `isAuthenticated()` - Check if user is logged in
 - `getPrincipal()` - Get user's principal as string
+- `getExpiresAt()` - Get session expiration date
 - `getIdentity()` - Get DelegationIdentity for canister calls
 - `createAgent()` - Create HTTP agent configured with user's identity
 
@@ -248,7 +249,11 @@ new ICPasswordAuth({
     idleTimeout: 10 * 60 * 1000,             // Milliseconds until auto-logout
     onIdle: () => { /* custom handler */ },
     captureScroll: false                     // Track scroll as activity
-  }
+  },
+  onProgress: (msg, step, total) => {        // Optional progress callback
+    console.log(`${msg} (${step}/${total})`);
+  },
+  debug: false                               // Enable debug logging
 })
 ```
 

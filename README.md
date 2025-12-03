@@ -221,6 +221,22 @@ console.log('Logged in as:', principal);
 
 ---
 
+##### `getExpiresAt(): Date | null`
+
+Returns the expiration date of the current session if authenticated, or null if not.
+
+**Returns:** `Date` or `null`
+
+**Example:**
+```javascript
+const expiresAt = window.icpassword.getExpiresAt();
+if (expiresAt) {
+    console.log('Session expires:', expiresAt.toLocaleString());
+}
+```
+
+---
+
 ##### `signOut(): void`
 
 Clears the current authentication session, removes stored session data, and stops the idle manager.
@@ -308,6 +324,15 @@ const auth = new ICPasswordAuth({
         captureScroll: false // Set to true to reset idle timer on scroll
     },
 
+    // Progress callback for authentication steps
+    onProgress: (message, currentStep, totalSteps) => {
+        console.log(`${message} (${currentStep}/${totalSteps})`);
+        // Update your UI with progress
+    },
+
+    // Enable debug logging (default: false)
+    debug: false,
+
     // Custom storage (defaults to localStorage)
     storage: {
         get: (key) => localStorage.getItem(key),
@@ -332,6 +357,27 @@ const auth = new ICPasswordAuth({
     }
 });
 ```
+
+### Progress Tracking
+
+The `onProgress` callback provides real-time feedback during authentication:
+
+```javascript
+const auth = new ICPasswordAuth({
+    onProgress: (message, currentStep, totalSteps) => {
+        // Update your UI - progress bar, status text, etc.
+        document.getElementById('status').textContent =
+            `${message} (${currentStep}/${totalSteps})`;
+    }
+});
+```
+
+**Progress Steps:**
+1. **"Hashing password..." (1/3)** - Argon2 password hashing (~250ms)
+2. **"Preparing login session..." (2/3)** - Identity creation and delegation preparation
+3. **"Requesting delegation..." (3/3)** - Final delegation request
+
+This is completely optional - if you don't provide a callback, authentication works exactly as before.
 
 ## How It Works
 
