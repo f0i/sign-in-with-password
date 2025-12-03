@@ -26,6 +26,10 @@
         cursor: pointer;
         font-size: 14px;
       }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
       .primary {
         background: #4caf50;
         color: white;
@@ -90,7 +94,7 @@
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
 
-        const buttons = document.querySelectorAll("button");
+        const buttons = document.querySelectorAll("#loginForm button");
         buttons.forEach((btn) => (btn.disabled = true));
         showMessage("Creating account...", "success");
 
@@ -111,7 +115,7 @@
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
 
-        const buttons = document.querySelectorAll("button");
+        const buttons = document.querySelectorAll("#loginForm button");
         buttons.forEach((btn) => (btn.disabled = true));
         showMessage("Signing in...", "success");
 
@@ -137,6 +141,10 @@
           icpassword.getPrincipal();
         document.getElementById("loginForm").style.display = "none";
         document.getElementById("dashboard").style.display = "block";
+        // Re-enable buttons for next time
+        document
+          .querySelectorAll("#loginForm button")
+          .forEach((btn) => (btn.disabled = false));
       }
 
       function showMessage(text, type) {
