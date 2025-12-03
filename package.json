@@ -1,6 +1,6 @@
 {
   "name": "ic-password-auth",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Password-based authentication library for the Internet Computer",
   "main": "dist/ic-password-auth.js",
   "types": "dist/ic-password-auth.d.ts",

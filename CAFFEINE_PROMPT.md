@@ -6,8 +6,8 @@ Add password-based authentication to my Internet Computer application using IC P
 
 ```html
 <script
-  src="https://fs6xl-xiaaa-aaaah-aqzwa-cai.icp0.io/static/v0.1.1/ic-password-auth.js"
-  integrity="sha256-PQHVAuIGK2Sc6GGCU2Ihacf8anFUIc7dKJeV0x3+32o="
+  src="https://fs6xl-xiaaa-aaaah-aqzwa-cai.icp0.io/static/v0.2.0/ic-password-auth.js"
+  integrity="sha256-kAwgPAUxbYaqMY6E2rMRn1zF3URjeSJbUYFkqPwYSUQ="
   crossorigin="anonymous">
 </script>
 ```

@@ -25,13 +25,13 @@ Include the library directly from the Internet Computer - no build tools needed:
 ```html
 <!-- IC Password Auth Library - hosted on Internet Computer -->
 <script
-  src="https://fs6xl-xiaaa-aaaah-aqzwa-cai.icp0.io/static/v0.1.1/ic-password-auth.js"
-  integrity="sha256-PQHVAuIGK2Sc6GGCU2Ihacf8anFUIc7dKJeV0x3+32o="
+  src="https://fs6xl-xiaaa-aaaah-aqzwa-cai.icp0.io/static/v0.2.0/ic-password-auth.js"
+  integrity="sha256-kAwgPAUxbYaqMY6E2rMRn1zF3URjeSJbUYFkqPwYSUQ="
   crossorigin="anonymous">
 </script>
 ```
 
-**Hash (SHA-256):** `3d01d502e2062b649ce8618253622169c7fc6a715421cedd289795d31dfedf6a`
+**Hash (SHA-256):** `900c203c05316d86aa318e84dab3119f5cc5dd446379225b518164a8fc184944`
 
 ### Option 2: npm Package (Recommended for Modern Web Apps)
 
