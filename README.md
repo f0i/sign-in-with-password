@@ -100,25 +100,36 @@ npm run build
             showLoginForm();
         }
 
-        // Authenticate user - handles both new and existing users
-        async function authenticate(username, password) {
+        // Sign up a new user
+        async function signUp(username, password) {
             try {
-                // Try to sign up first
                 const result = await window.icpassword.signUp(username, password);
-
-                if (result.isNewUser) {
-                    console.log('✅ New account created!');
-                } else {
-                    console.log('✅ Signed in to existing account!');
-                }
-
+                
+                console.log('✅ New account created!');
                 console.log('Principal:', result.principal);
                 console.log('Session expires:', result.expiresAt);
 
                 showDashboard();
                 return result;
             } catch (error) {
-                console.error('❌ Authentication failed:', error);
+                console.error('❌ Sign up failed:', error);
+                throw error;
+            }
+        }
+
+        // Sign in an existing user
+        async function signIn(username, password) {
+            try {
+                const result = await window.icpassword.signIn(username, password);
+                
+                console.log('✅ Signed in!');
+                console.log('Principal:', result.principal);
+                console.log('Session expires:', result.expiresAt);
+
+                showDashboard();
+                return result;
+            } catch (error) {
+                console.error('❌ Sign in failed:', error);
                 throw error;
             }
         }
