@@ -826,6 +826,10 @@ export class ICPasswordAuth {
 
         const seed = result.hash;
 
+        // Terminate worker to free resources (auth is infrequent)
+        worker.terminate();
+        argon2Worker = null;
+
         // Report progress: Step 2 - Preparing login session
         this.config.onProgress?.({ message: "Preparing login session...", step: 2, total: 3 });
 
